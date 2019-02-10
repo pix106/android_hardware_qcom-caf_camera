@@ -1389,6 +1389,10 @@ typedef struct {
     cam_dimension_t fd_frame_dim;              /* frame dims on which fd is applied */
     uint8_t update_flag;                       /* flag to inform whether HAL needs to send cb
                                                 * to app or not */
+
+#ifdef TARGET_DEVICE_CLOVER
+    volatile char xiaomi_reversed[160];
+#endif
 } cam_face_detection_data_t;
 
 // definition of composite face detection data
@@ -1700,6 +1704,10 @@ typedef struct {
     uint32_t est_snap_target;
 #ifdef TARGET_DEVICE_LAVENDER
     uint32_t xm[3];
+#endif
+
+#ifdef TARGET_DEVICE_CLOVER
+    volatile char xiaomi_reversed[20];
 #endif
 } cam_3a_params_t;
 
