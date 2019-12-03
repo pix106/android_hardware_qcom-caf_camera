@@ -941,6 +941,20 @@ typedef struct {
     INCLUDE(CAM_INTF_META_CDS_DATA,                     cam_cds_data_t,                 1);
     INCLUDE(CAM_INTF_PARM_UPDATE_DEBUG_LEVEL,           uint32_t,                       1);
 
+    /* Xiaomi Add */
+    INCLUDE(CAM_INTF_XM_06,                             uint8_t,                        1);
+    INCLUDE(CAM_INTF_XM_02,                             uint8_t,                        1);
+    INCLUDE(CAM_INTF_XM_03,                             uint8_t,                        1);
+    INCLUDE(CAM_INTF_XM_04,                             uint8_t,                        1);
+    INCLUDE(CAM_INTF_XM_05,                             uint8_t,                        1);
+    INCLUDE(CAM_INTF_XM_07,                             uint32_t,                       1);
+    INCLUDE(CAM_INTF_XM_08,                             uint32_t,                       1);
+    INCLUDE(CAM_INTF_XM_09,                             uint32_t,                       1);
+    INCLUDE(CAM_INTF_XM_10,                             uint32_t,                       1);
+    INCLUDE(CAM_INTF_XM_12,                             uint32_t,                       1);
+    INCLUDE(CAM_INTF_XM_01,                             uint32_t,                       3);
+    INCLUDE(CAM_INTF_XM_11,                             uint32_t,                       1);
+
     /* Specific to HAl1 */
     INCLUDE(CAM_INTF_META_CROP_DATA,                    cam_crop_data_t,                1);
     INCLUDE(CAM_INTF_META_PREP_SNAPSHOT_DONE,           int32_t,                        1);

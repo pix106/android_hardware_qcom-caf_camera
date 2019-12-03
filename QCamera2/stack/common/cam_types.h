@@ -1673,6 +1673,7 @@ typedef struct {
     int32_t est_snap_iso_value;
     uint32_t est_snap_luma;
     uint32_t est_snap_target;
+    uint32_t xm[3];
 } cam_3a_params_t;
 
 typedef struct {
@@ -2179,6 +2180,18 @@ typedef enum {
     CAM_INTF_PARM_VFE1_RESERVED_RDI,
     CAM_INTF_PARM_INT_EVT,
 
+    CAM_INTF_XM_01,
+    CAM_INTF_XM_02,
+    CAM_INTF_XM_03,
+    CAM_INTF_XM_04,
+    CAM_INTF_XM_05,
+    CAM_INTF_XM_06,
+    CAM_INTF_XM_07,
+    CAM_INTF_XM_08,
+    CAM_INTF_XM_09,
+    CAM_INTF_XM_10,
+    CAM_INTF_XM_11,
+
     /* specific to HAL3 */
     /* Whether the metadata maps to a valid frame number */
     CAM_INTF_META_FRAME_NUMBER_VALID,
@@ -2462,6 +2475,9 @@ typedef enum {
     CAM_INTF_META_FOCUS_VALUE,
     /*Spot light detection result output from af core*/
     CAM_INTF_META_SPOT_LIGHT_DETECT,
+
+    CAM_INTF_XM_12,
+
     /* HAL based HDR*/
     CAM_INTF_PARM_HAL_BRACKETING_HDR,
     /* Dual camera - Spatial Alignment Compute/Correction output info*/
