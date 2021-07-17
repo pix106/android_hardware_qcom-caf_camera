@@ -12,7 +12,11 @@ LOCAL_CFLAGS+= -D_ANDROID_ -DQCAMERA_REDEFINE_LOG
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
+ifneq ($(QCPATH),)
+LIB2D_ROTATION=true
+else
 LIB2D_ROTATION=false
+endif
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/inc \
