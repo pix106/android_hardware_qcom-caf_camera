@@ -185,7 +185,7 @@ ifeq ($(TARGET_HAS_LOW_RAM), true)
 LOCAL_CFLAGS += -DHAS_LOW_RAM
 endif
 
-ifeq ($(TARGET_KERNEL_VERSION), 4.14)
+ifneq (,$(filter $(strip $(TARGET_KERNEL_VERSION)),4.14 4.19))
     ifeq ($(TARGET_BOARD_PLATFORM), sdm660)
         LOCAL_CFLAGS += -DSUPPORT_ONLY_HAL3
     endif
