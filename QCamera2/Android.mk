@@ -185,6 +185,11 @@ ifeq ($(TARGET_HAS_LOW_RAM), true)
 LOCAL_CFLAGS += -DHAS_LOW_RAM
 endif
 
+ifeq ($(TARGET_KERNEL_VERSION), 4.14)
+    ifeq ($(TARGET_BOARD_PLATFORM), sdm660)
+        LOCAL_CFLAGS += -DSUPPORT_ONLY_HAL3
+    endif
+endif
 
 LOCAL_STATIC_LIBRARIES := android.hardware.camera.common@1.0-helper
 
