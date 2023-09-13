@@ -574,6 +574,10 @@ typedef struct cam_capability{
     cam_rational_type_t calibration_transform2[CAL_TRANSFORM_ROWS][CAL_TRANSFORM_COLS];
     uint16_t isCacSupported;
 
+#ifdef TARGET_DEVICE_PLATINA
+    volatile char xiaomi_reversed1[64];
+#endif
+
     cam_opaque_raw_format_t opaque_raw_fmt;
 
     /* true Portrait info */

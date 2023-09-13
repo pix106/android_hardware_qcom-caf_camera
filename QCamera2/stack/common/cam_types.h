@@ -1709,6 +1709,10 @@ typedef struct {
 #ifdef TARGET_DEVICE_CLOVER
     volatile char xiaomi_reversed[20];
 #endif
+
+#ifdef TARGET_DEVICE_PLATINA
+    float xiaomi_reversed[2];
+#endif
 } cam_3a_params_t;
 
 typedef struct {
