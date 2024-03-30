@@ -6756,7 +6756,7 @@ int32_t QCameraParameters::initDefaultParameters()
     // Set min max values for Blur values (min: 0, max: 100, step: 1)
     if (isDualCamAvailable()) {
         String8 minMaxValues = createMinMaxValuesString(MIN_BLUR, MAX_BLUR, BLUR_STEP);
-        set(KEY_QC_SUPPORTED_DEGREES_OF_BLUR, minMaxValues.string());
+        set(KEY_QC_SUPPORTED_DEGREES_OF_BLUR, minMaxValues.c_str());
         set(KEY_QC_IS_BOKEH_MODE_SUPPORTED, 1);
         set(KEY_QC_IS_BOKEH_MPO_SUPPORTED, 1);
         set(KEY_QC_BOKEH_MODE, 0);
@@ -6764,7 +6764,7 @@ int32_t QCameraParameters::initDefaultParameters()
         set(KEY_QC_BOKEH_MPO_MODE, 0);
     } else {
         String8 minMaxValues = createMinMaxValuesString(0, 0, 0);
-        set(KEY_QC_SUPPORTED_DEGREES_OF_BLUR, minMaxValues.string());
+        set(KEY_QC_SUPPORTED_DEGREES_OF_BLUR, minMaxValues.c_str());
         set(KEY_QC_IS_BOKEH_MODE_SUPPORTED, 0);
         set(KEY_QC_IS_BOKEH_MPO_SUPPORTED, 0);
         set(KEY_QC_BOKEH_MODE, 0);
