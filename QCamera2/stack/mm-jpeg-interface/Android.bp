@@ -1,0 +1,54 @@
+
+
+cc_library_shared {
+    name: "libmmjpeg_interface",
+    compile_multilib: "32",
+    cflags: [
+        "-D_ANDROID_",
+        "-DQCAMERA_REDEFINE_LOG",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-DUSE_ION",
+        "-DMM_JPEG_CONCURRENT_SESSIONS_COUNT=1",
+        "-DMM_JPEG_USE_PIPELINE",
+        "-DSYSTEM_HEADER_PREFIX=sys",
+    ],
+    include_dirs: [
+        "system/memory/libion/kernel-headers",
+        "system/memory/libion/include",
+        "hardware/qcom-caf/sdm660/camera/QCamera2/stack/common",
+        "hardware/qcom-caf/sdm660/camera/QCamera2/stack/mm-camera-interface/inc",
+        "hardware/qcom-caf/sdm660/camera",
+        "hardware/qcom-caf/sdm660/camera/mm-image-codec/qexif",
+        "hardware/qcom-caf/sdm660/camera/mm-image-codec/qomx_core",
+    ],
+    local_include_dirs: ["inc"],
+    header_libs: [
+        "libutils_headers",
+        "media_plugin_headers",
+        "generated_kernel_headers",
+    ],
+
+    shared_libs: [
+        "libdl",
+        "libcutils",
+        "liblog",
+        "libqomx_core",
+        "libmmcamera_interface",
+        "libutils",
+        "libion",
+    ],
+    srcs: [
+        "src/mm_jpeg_queue.c",
+        "src/mm_jpeg_exif.c",
+        "src/mm_jpeg.c",
+        "src/mm_jpeg_interface.c",
+        "src/mm_jpeg_ionbuf.c",
+        "src/mm_jpegdec_interface.c",
+        "src/mm_jpegdec.c",
+        "src/mm_jpeg_mpo_composer.c",
+    ],
+    vendor: true,
+}
