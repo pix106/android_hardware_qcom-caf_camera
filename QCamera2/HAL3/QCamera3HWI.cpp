@@ -9851,6 +9851,8 @@ QCamera3HardwareInterface::translateFromHalMetadata(
         camMetadata.update(ANDROID_SHADING_MODE, &fwk_shadingMode, 1);
     }
 
+    uint8_t fwk_faceDetectModeDefault = ANDROID_STATISTICS_FACE_DETECT_MODE_OFF;
+    camMetadata.update(ANDROID_STATISTICS_FACE_DETECT_MODE, &fwk_faceDetectModeDefault, 1);
     IF_META_AVAILABLE(uint32_t, faceDetectMode, CAM_INTF_META_STATS_FACEDETECT_MODE, metadata) {
         int val = lookupFwkName(FACEDETECT_MODES_MAP, METADATA_MAP_SIZE(FACEDETECT_MODES_MAP),
                 *faceDetectMode);
