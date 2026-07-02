@@ -29,32 +29,14 @@
 
 #ifndef __QCAMERADISPLAY_H__
 #define __QCAMERADISPLAY_H__
-#ifdef USE_DISPLAY_SERVICE
+
 #ifdef LIKELY
 #undef LIKELY
 #undef UNLIKELY
 #endif //LIKELY
-#include <android/frameworks/displayservice/1.0/IDisplayService.h>
-#include <android/frameworks/displayservice/1.0/IEventCallback.h>
-#include <android/frameworks/displayservice/1.0/IDisplayEventReceiver.h>
-#include <android/hidl/manager/1.0/IServiceNotification.h>
-#include <android/looper.h>
-#include <utils/Looper.h>
 
-using ::android::frameworks::displayservice::V1_0::IDisplayEventReceiver;
-using ::android::frameworks::displayservice::V1_0::IDisplayService;
-using ::android::frameworks::displayservice::V1_0::IEventCallback;
-using ::android::frameworks::displayservice::V1_0::Status;
-using ::android::hardware::hidl_death_recipient;
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::hardware::hidl_string;
-using ::android::wp;
-using ::android::sp;
-#else //USE_DISPLAY_SERVICE
 #include <utils/Timers.h>
 #include <gui/DisplayEventReceiver.h>
-#endif //USE_DISPLAY_SERVICE
 
 namespace qcamera {
 
@@ -67,40 +49,8 @@ public:
     QCameraDisplay();
     ~QCameraDisplay();
 
-#ifdef USE_DISPLAY_SERVICE
-    void        init();
-    bool        isInited() { return m_bInitDone; }
-    bool        isSyncing() {return m_bSyncing; }
-    bool        startVsync(bool start);
-    static QCameraDisplay* instance();
-
-class DisplayEventCallback : public IEventCallback {
-    Return<void> onVsync(uint64_t timestamp, uint32_t count) override {
-        ALOGV("onVsync: timestamp=%llu count=%d", timestamp, count);
-        QCameraDisplay::instance()->computeAverageVsyncInterval(timestamp);
-        return Void();
-    }
-    Return<void> onHotplug(uint64_t timestamp, bool connected) override {
-        ALOGV("onHotplug: timestamp=%llu connected=%s", timestamp, connected ? "true" : "false");
-        return Void();
-    }
-};
-
-class DeathRecipient : virtual public hidl_death_recipient {
-    virtual void serviceDied(uint64_t cookie, const wp<android::hidl::base::V1_0::IBase>& who) override;
-};
-
-class ServiceRegisterNotification :
-                virtual public android::hidl::manager::V1_0::IServiceNotification {
-    virtual Return<void> onRegistration(const hidl_string& fqName,
-                                              const hidl_string& name,
-                                              bool preexisting) override;
-};
-
-#else //USE_DISPLAY_SERVICE
     static int   vsyncEventReceiverCamera(int fd, int events, void* data);
     static void* vsyncThreadCamera(void * data);
-#endif //USE_DISPLAY_SERVICE
     void        computeAverageVsyncInterval(nsecs_t currentVsyncTimeStamp);
     nsecs_t     computePresentationTimeStamp(nsecs_t frameTimeStamp);
 private:
@@ -121,20 +71,9 @@ private:
     // 30.2 fps vs display running at 60 fps.
     nsecs_t  mVfe_and_mdp_freq_wiggle_filter_max_ns;
     nsecs_t  mVfe_and_mdp_freq_wiggle_filter_min_ns;
-#ifdef USE_DISPLAY_SERVICE
-    bool     m_bInitDone;
-    bool     m_bSyncing;
-    sp<IDisplayEventReceiver> mDisplayEventReceiver;
-    sp<IDisplayService> mDisplayService;
-    sp<DeathRecipient> mDeathRecipient;
-    sp<DisplayEventCallback> mDisplayEventCallback;
-    sp<ServiceRegisterNotification> mRegistrationCB;
-    static QCameraDisplay *mCameraDisplay;
-#else //USE_DISPLAY_SERVICE
     pthread_t mVsyncThreadCameraHandle;
     uint32_t  mThreadExit;
     android::DisplayEventReceiver  mDisplayEventReceiver;
-#endif //USE_DISPLAY_SERVICE
 
 };
 

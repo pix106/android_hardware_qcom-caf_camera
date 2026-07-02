@@ -1740,11 +1740,7 @@ QCamera2HardwareInterface::QCamera2HardwareInterface(uint32_t cameraId)
     mCameraDevice.ops = &mCameraOps;
     mCameraDevice.priv = this;
 
-#ifndef USE_DISPLAY_SERVICE
     mCameraDisplay = new QCameraDisplay();
-#else
-    mCameraDisplay = QCameraDisplay::instance();
-#endif
     mDualCamera = is_dual_camera_by_idx(cameraId);
     pthread_condattr_t mCondAttr;
 
@@ -4002,12 +3998,6 @@ int QCamera2HardwareInterface::startPreview()
 
     m_perfLockMgr.acquirePerfLockIfExpired(PERF_LOCK_START_PREVIEW);
 
-#ifdef USE_DISPLAY_SERVICE
-    if(!mCameraDisplay->startVsync(TRUE)) {
-        LOGE("Error: Cannot start vsync (still continue)");
-    }
-#endif //USE_DISPLAY_SERVICE
-
     updateThermalLevel((void *)&mThermalLevel);
 
     setDisplayFrameSkip();
@@ -4129,9 +4119,6 @@ int QCamera2HardwareInterface::stopPreview()
     // delete all channels from preparePreview
     unpreparePreview();
     m_bFirstPreviewFrameReceived = false;
-#ifdef USE_DISPLAY_SERVICE
-    mCameraDisplay->startVsync(FALSE);
-#endif //Use_DISPLAY_SERVICE
 
     m_perfLockMgr.releasePerfLock(PERF_LOCK_STOP_PREVIEW);
     LOGI("X");

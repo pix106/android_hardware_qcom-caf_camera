@@ -40,26 +40,15 @@ extern "C" {
 #define DISPLAY_EVENT_RECEIVER_ARRAY_SIZE  1
 #define DISPLAY_DEFAULT_FPS                60
 
-#ifdef USE_DISPLAY_SERVICE
-using ::android::frameworks::displayservice::V1_0::IDisplayEventReceiver;
-using ::android::frameworks::displayservice::V1_0::IDisplayService;
-using ::android::frameworks::displayservice::V1_0::IEventCallback;
-using ::android::frameworks::displayservice::V1_0::Status;
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::sp;
-#else //USE_DISPLAY_SERVICE
 #include <utils/Errors.h>
 #include <utils/Looper.h>
 using ::android::status_t;
 using ::android::NO_ERROR;
 using ::android::Looper;
 #define ALOOPER_EVENT_INPUT android::Looper::EVENT_INPUT
-#endif //USE_DISPLAY_SERVICE
 
 namespace qcamera {
 
-#ifndef USE_DISPLAY_SERVICE
 /*===========================================================================
  * FUNCTION   : vsyncEventReceiverCamera
  *
@@ -121,93 +110,6 @@ void* QCameraDisplay::vsyncThreadCamera(void * data)
     }
     return NULL;
 }
-#else //USER_DISPLAY_SERVICE
-//initializing static
-QCameraDisplay*
-QCameraDisplay::mCameraDisplay = NULL;
-
-/*===========================================================================
- * FUNCTION   : onRegistration
- *
- * DESCRIPTION: DisplayService registered notification callback from hwservice.
- *              Calling init to get display service.
- *
- * PARAMETERS :
- *   @fqName  : fully-qualified instance name (UNUSED).
- *   @name    : string by which display service is registerd.
- *   @preexisting: If true, this means the registration was
- *                 pre-existing at the time this IServiceNotification
- *                 object is itself registered. Otherwise, this means
- *                 onRegistration is triggered by a newly registered
- *                 service.
- *
- * RETURN     : void.Just to fullfill the type requirement of thread function.
- *==========================================================================*/
-Return<void>
-QCameraDisplay::ServiceRegisterNotification::onRegistration(const hidl_string & /*fqName*/,
-                                                                  const hidl_string & /*name*/,
-                                                                  bool /*preexisting*/)
-{
-    if(mCameraDisplay->mDisplayService != nullptr)
-    {
-        return Return<void>();
-    }
-
-    LOGD("Display service is available, get the interface");
-    mCameraDisplay->init();
-
-    return Return<void>();
-}
-
-/*===========================================================================
- * FUNCTION   : instance
- *
- * DESCRIPTION: create singleton instance of QCameraDisplay
- *
- * PARAMETERS : none
- *
- * RETURN     : pointer to QCameraDisplay
- *==========================================================================*/
-QCameraDisplay*
-QCameraDisplay::instance()
-{
-    if(mCameraDisplay == NULL)
-    {
-        mCameraDisplay = new QCameraDisplay();
-        mCameraDisplay->mRegistrationCB = new ServiceRegisterNotification();
-        IDisplayService::registerForNotifications("", mCameraDisplay->mRegistrationCB);
-    }
-    return mCameraDisplay;
-}
-
-/*===========================================================================
- * FUNCTION   : serviceDied
- *
- * DESCRIPTION: Display service death recipient. Clear all variables.
- *
- * PARAMETERS : uint64_t & IBase refrence of dead serivce (unused).
- *
- * RETURN     : none
- *==========================================================================*/
-void
-QCameraDisplay::DeathRecipient::serviceDied(uint64_t /*cookie*/,
-                                const wp<android::hidl::base::V1_0::IBase>& /*who*/)
-{
-    if(mCameraDisplay && mCameraDisplay->m_bInitDone)
-    {
-        mCameraDisplay->m_bInitDone = false;
-        mCameraDisplay->m_bSyncing = false;
-        mCameraDisplay->mDisplayEventReceiver.clear();
-        mCameraDisplay->mDisplayService.clear();
-        mCameraDisplay->mDisplayEventCallback.clear();
-        mCameraDisplay->mDeathRecipient.clear();
-        mCameraDisplay->mDeathRecipient = nullptr;
-        mCameraDisplay->mDisplayEventCallback = nullptr;
-        mCameraDisplay->mDisplayEventReceiver = nullptr;
-        mCameraDisplay->mDisplayService = nullptr;
-    }
-}
-#endif //USE_DISPLAY_SERVICE
 
 /*===========================================================================
  * FUNCTION   : QCameraDisplay
@@ -228,26 +130,14 @@ QCameraDisplay::QCameraDisplay()
       mSet_timestamp_num_ns_prior_to_vsync(0),
       mVfe_and_mdp_freq_wiggle_filter_max_ns(0),
       mVfe_and_mdp_freq_wiggle_filter_min_ns(0),
-#ifndef USE_DISPLAY_SERVICE
       mThreadExit(0)
-#else //USE_DISPLAY_SERVICE
-      m_bInitDone(false),
-      m_bSyncing(false)
-#endif //USE_DISPLAY_SERVICE
 {
-#ifdef USE_DISPLAY_SERVICE
-    mDisplayService = nullptr;
-    mDisplayEventReceiver = nullptr;
-    mDeathRecipient = nullptr;
-    mDisplayEventCallback = nullptr;
-#else //USE_DISPLAY_SERVICE
     int rc = NO_ERROR;
 
     memset(&mVsyncIntervalHistory, 0, sizeof(mVsyncIntervalHistory));
     rc = pthread_create(&mVsyncThreadCameraHandle, NULL, vsyncThreadCamera, (void *)this);
     if (rc == NO_ERROR) {
         pthread_setname_np(mVsyncThreadCameraHandle, "CAM_Vsync");
-#endif //USE_DISPLAY_SERVICE
         char  value[PROPERTY_VALUE_MAX];
         nsecs_t default_vsync_interval;
         // Read a list of properties used for tuning
@@ -276,11 +166,9 @@ QCameraDisplay::QCameraDisplay()
                 vfe_and_mdp_freq_wiggle_filter_min_ns %llu",
                 mVfe_and_mdp_freq_wiggle_filter_max_ns,
                 mVfe_and_mdp_freq_wiggle_filter_min_ns);
-#ifndef USE_DISPLAY_SERVICE
       } else {
           mVsyncThreadCameraHandle = 0;
       }
-#endif //USE_DISPLAY_SERVICE
 }
 
 /*===========================================================================
@@ -294,128 +182,11 @@ QCameraDisplay::QCameraDisplay()
  *==========================================================================*/
 QCameraDisplay::~QCameraDisplay()
 {
-#ifdef USE_DISPLAY_SERVICE
-    if(mDisplayEventReceiver != nullptr)
-    {
-        mDisplayEventReceiver->close();
-    }
-    mDisplayEventCallback.clear();
-    mDeathRecipient.clear();
-    mDisplayEventReceiver.clear();
-    mDisplayService.clear();
-    mRegistrationCB.clear();
-#else
     mThreadExit = 1;
     if (mVsyncThreadCameraHandle != 0) {
         pthread_join(mVsyncThreadCameraHandle, NULL);
     }
-#endif //USE_DISPLAY_SERVICE
 }
-
-#ifdef USE_DISPLAY_SERVICE
-/*===========================================================================
- * FUNCTION   : init
- *
- * DESCRIPTION: Get the display service and register for the callback. OnVsync
- *              and onHotPlug callback will we called based on setVsyncRate
- *              parameter. Check isInitDone to see if init is success or not.
- *
- * PARAMETERS : none
- *
- * RETURN     : none.
- *==========================================================================*/
-void
-QCameraDisplay::init()
-{
-    //get the display service and register for Event receiver.
-    mDisplayService = android::frameworks::displayservice::V1_0::IDisplayService::getService();
-    if(mDisplayService == nullptr)
-    {
-        LOGE("Camera failed to get Displayservice for vsync.");
-        return;
-    }
-
-    Return<sp<IDisplayEventReceiver>> ret = mDisplayService->getEventReceiver();
-    mDisplayEventReceiver = ret;
-    if(!ret.isOk() || (mDisplayEventReceiver == nullptr))
-    {
-      LOGE("Failed to get display event receiver");
-      return;
-    }
-
-    if(mDisplayEventCallback == nullptr)
-    {
-        mDisplayEventCallback = new DisplayEventCallback();
-    }
-
-    if(mDeathRecipient == nullptr)
-    {
-        mDeathRecipient = new DeathRecipient();
-    }
-
-    mDisplayService->linkToDeath(mDeathRecipient,0);
-    m_bInitDone = true;
-
-}
-
-/*===========================================================================
- * FUNCTION   : startVsync
- *
- * DESCRIPTION: Start or stop the onVsync or onHotPlug callback.
- *
- * PARAMETERS : true to start callback or false to stop callback
- *
- * RETURN     : true in success, false in error case.
- *==========================================================================*/
-bool
-QCameraDisplay::startVsync(bool bStart)
-{
-    if(!m_bInitDone || mDisplayEventReceiver == nullptr)
-    {
-        LOGE("ERROR: Display event callbacks is not registered");
-        return false;
-    }
-
-    if(bStart)
-    {
-         /*setting callbacks*/
-         Return<Status> retVal = mDisplayEventReceiver->init(mDisplayEventCallback);
-         if(!retVal.isOk() || (Status::SUCCESS != static_cast<Status>(retVal)) )
-         {
-             LOGE("Failed to register display vsync callback");
-             return false;
-         }
-        /*send callback for each vsync event*/
-        retVal = mDisplayEventReceiver->setVsyncRate(1);
-        if(!retVal.isOk() || (Status::SUCCESS != static_cast<Status>(retVal)) )
-        {
-            LOGE("Failed to start vsync events");
-            return false;
-        }
-    }
-    else
-    {
-        /*disabling sending callback for vsync event*/
-        Return<Status> retVal = mDisplayEventReceiver->setVsyncRate(0);
-        if(!retVal.isOk() || (Status::SUCCESS != static_cast<Status>(retVal)) )
-        {
-            LOGE("Failed to stop vsync events");
-            return false;
-        }
-        /*Disable callbacks*/
-        retVal = mDisplayEventReceiver->close();
-        if(!retVal.isOk() || (Status::SUCCESS != static_cast<Status>(retVal)))
-        {
-            LOGE("Failed to disable vsync callback");
-            return false;
-        }
-    }
-    LOGI("Display sync event %s", (bStart)?"started":"stopped");
-
-    m_bSyncing = (bStart)?true:false;
-    return true; //sync rate is set
-}
-#endif //USE_DISPLAY_SERVICE
 
 /*===========================================================================
  * FUNCTION   : computeAverageVsyncInterval
@@ -476,12 +247,7 @@ nsecs_t QCameraDisplay::computePresentationTimeStamp(nsecs_t frameTimeStamp)
     nsecs_t presentationTimeStamp = 0;
     int     expectedVsyncOffset   = 0;
     int     vsyncOffset;
-#ifdef USE_DISPLAY_SERVICE
-    if(!isSyncing())
-    {
-       return 0;
-    }
-#endif //USE_DISPLAY_SERVICE
+
     if ( (mAvgVsyncInterval != 0) && (mVsyncTimeStamp != 0) ) {
         // Compute presentation time stamp in future as per the following formula
         // future time stamp = vfe time stamp +  N *  average vsync interval

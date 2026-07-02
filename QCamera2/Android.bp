@@ -16,7 +16,6 @@ cc_library_shared {
         "-D_ANDROID",
         "-DUSE_HAL_3_5",
         "-DVANILLA_HAL",
-        "-DUSE_DISPLAY_SERVICE",
         "-std=c++14",
         "-std=gnu++1z",
         "-DUSE_VENDOR_PROP",
@@ -92,8 +91,6 @@ cc_library_shared {
         "libdl",
         "libhal_dbg",
         "libion",
-        "android.frameworks.displayservice@1.0",
-
         "libhidlbase",
         "libts_face_beautify_hal",
         "libts_detected_face_hal",
