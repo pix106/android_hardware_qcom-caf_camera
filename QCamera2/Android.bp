@@ -33,6 +33,7 @@ cc_library_shared {
     include_dirs: [
         "hardware/qcom-caf/sdm660/camera/mm-image-codec/qexif",
         "hardware/qcom-caf/sdm660/camera/mm-image-codec/qomx_core",
+        "frameworks/native/include",
         "hardware/qcom-caf/sdm660/media/libstagefrighthw",
         "hardware/qcom-caf/sdm660/media/mm-core/inc",
         "system/memory/libion/kernel-headers",
@@ -53,6 +54,7 @@ cc_library_shared {
         "libandroid_sensor_headers",
         "libcutils_headers",
         "libsystem_headers",
+        "libgui_headers",
         "libhardware_headers",
         "display_headers",
         "generated_kernel_headers",
@@ -94,6 +96,7 @@ cc_library_shared {
         "libhidlbase",
         "libts_face_beautify_hal",
         "libts_detected_face_hal",
+        "libgui",
     ],
     srcs: [
         "util/QCameraBufferMaps.cpp",
