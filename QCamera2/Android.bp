@@ -20,6 +20,9 @@ soong_config_module_type {
 
 camera_hal_cc_defaults {
     name: "camera_hal_defaults",
+    cflags: [
+        "-Wno-unused-but-set-variable",
+    ],
     soong_config_variables: {
         target_device: {
             clover: {
