@@ -3,6 +3,7 @@
 cc_library_shared {
     name: "libmmcamera_interface",
     compile_multilib: "32",
+    defaults: ["camera_hal_defaults"],
     cflags: [
         "-DSYSTEM_HEADER_PREFIX=sys",
         "-DUSE_ION",

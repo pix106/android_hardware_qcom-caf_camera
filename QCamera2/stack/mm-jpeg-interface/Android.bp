@@ -3,6 +3,7 @@
 cc_library_shared {
     name: "libmmjpeg_interface",
     compile_multilib: "32",
+    defaults: ["camera_hal_defaults"],
     cflags: [
         "-D_ANDROID_",
         "-DQCAMERA_REDEFINE_LOG",

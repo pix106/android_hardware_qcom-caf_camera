@@ -2,6 +2,8 @@
 
 cc_library_shared {
     name: "libhal_dbg",
+    compile_multilib: "32",
+    defaults: ["camera_hal_defaults"],
     cflags: [
         "-D_ANDROID_",
         "-Werror",
